@@ -38,6 +38,7 @@ import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.ProxyVersion;
 import com.velocitypowered.proxy.command.VelocityCommandManager;
 import com.velocitypowered.proxy.command.builtin.GlistCommand;
+import com.velocitypowered.proxy.command.builtin.SendCommand;
 import com.velocitypowered.proxy.command.builtin.ServerCommand;
 import com.velocitypowered.proxy.command.builtin.ShutdownCommand;
 import com.velocitypowered.proxy.command.builtin.VelocityCommand;
@@ -216,6 +217,7 @@ public class VelocityServer implements ProxyServer, ForwardingAudience {
     commandManager.register("shutdown", ShutdownCommand.command(this),
         "end", "stop");
     new GlistCommand(this).register();
+    new SendCommand(this).register();
 
     this.doStartupConfigLoad();
 
@@ -572,6 +574,11 @@ public class VelocityServer implements ProxyServer, ForwardingAudience {
     shutdown(true);
   }
 
+  @Override
+  public void closeListeners() {
+    this.cm.closeEndpoints(false);
+  }
+
   public AsyncHttpClient getAsyncHttpClient() {
     return cm.getHttpClient();
   }
@@ -747,9 +754,18 @@ public class VelocityServer implements ProxyServer, ForwardingAudience {
     return bossBarManager;
   }
 
+  /**
+   * Returns a Gson instance for use in serializing server ping instances.
+   *
+   * @param version the protocol version in use
+   * @return the Gson instance
+   */
   public static Gson getPingGsonInstance(ProtocolVersion version) {
-    return version.compareTo(ProtocolVersion.MINECRAFT_1_16) >= 0 ? POST_1_16_PING_SERIALIZER
-        : PRE_1_16_PING_SERIALIZER;
+    if (version == ProtocolVersion.UNKNOWN
+        || version.compareTo(ProtocolVersion.MINECRAFT_1_16) >= 0) {
+      return POST_1_16_PING_SERIALIZER;
+    }
+    return PRE_1_16_PING_SERIALIZER;
   }
 
   @Override

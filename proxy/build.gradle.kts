@@ -1,9 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 
-@Suppress("DSL_SCOPE_VIOLATION") // fixed in Gradle 8.1
 plugins {
     application
-    `set-manifest-impl-version`
+    id("velocity-init-manifest")
     alias(libs.plugins.shadow)
 }
 
@@ -94,6 +93,7 @@ dependencies {
     implementation(project(":velocity-native"))
 
     implementation(libs.bundles.log4j)
+    implementation(libs.kyori.ansi)
     implementation(libs.netty.codec)
     implementation(libs.netty.codec.haproxy)
     implementation(libs.netty.codec.http)
@@ -101,6 +101,9 @@ dependencies {
     implementation(libs.netty.transport.native.epoll)
     implementation(variantOf(libs.netty.transport.native.epoll) { classifier("linux-x86_64") })
     implementation(variantOf(libs.netty.transport.native.epoll) { classifier("linux-aarch_64") })
+    implementation(libs.netty.transport.native.kqueue)
+    implementation(variantOf(libs.netty.transport.native.kqueue) { classifier("osx-x86_64") })
+    implementation(variantOf(libs.netty.transport.native.kqueue) { classifier("osx-aarch_64") })
 
     implementation(libs.jopt)
     implementation(libs.terminalconsoleappender)
@@ -115,6 +118,7 @@ dependencies {
     implementation(libs.nightconfig)
     implementation(libs.bstats)
     implementation(libs.lmbda)
+    implementation(libs.asm)
     implementation(libs.bundles.flare)
     compileOnly(libs.spotbugs.annotations)
     testImplementation(libs.mockito)
